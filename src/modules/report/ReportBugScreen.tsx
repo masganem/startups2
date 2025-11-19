@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import type { SubmitHandler } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Button, Card, CardContent, Chip, Grid, Stack, TextField, Typography } from '@mui/material'
 import { submitBugReport } from '../../services/mockApi'
 import { useDeviceInfo } from '../../hooks/useDeviceInfo'
 import { useBugReportForm, type BugReportFormValues } from '../../hooks/useBugReportForm'
 import { useUIStore } from '../../store/uiStore'
 import { companies } from '../../data/mockData'
+
+const deviceFields = ['os', 'browser', 'version', 'locale'] as const
 
 export function ReportBugScreen() {
   const navigate = useNavigate()
@@ -48,97 +51,147 @@ export function ReportBugScreen() {
   }
 
   if (!service) {
-    return <p className="text-sm text-slate-400">Select a service first.</p>
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Selecione um serviço primeiro.
+      </Typography>
+    )
   }
 
+  const companyName = companies.find((c) => c.id === companyId)?.name
+
   return (
-    <section className="space-y-5">
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg shadow-slate-950/40">
-        <p className="text-xs uppercase tracking-[0.4em] text-slate-500">reporting for</p>
-        <h3 className="text-2xl font-semibold text-white">{service.name}</h3>
-        <p className="text-sm text-slate-400">{companies.find((c) => c.id === companyId)?.name}</p>
-      </div>
+    <Stack spacing={4}>
+      <Card
+        elevation={12}
+        sx={{
+          borderRadius: 3,
+          backgroundColor: 'rgba(15, 23, 42, 0.85)',
+          border: '1px solid rgba(148, 163, 184, 0.25)',
+        }}
+      >
+        <CardContent>
+          <Typography variant="overline" sx={{ letterSpacing: '0.35em', color: 'text.secondary' }}>
+            reportando para
+          </Typography>
+          <Typography variant="h5" fontWeight={600}>
+            {service.name}
+          </Typography>
+          {companyName && (
+            <Typography variant="body2" color="text.secondary">
+              {companyName}
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
 
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-1">
-          <label className="text-xs uppercase tracking-[0.4em] text-slate-500">title</label>
-          <input
-            type="text"
-            className="w-full rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-primary focus:outline-none"
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Stack spacing={3}>
+          <TextField
+            fullWidth
+            label="Título"
+            placeholder="Ex.: painel trava ao rotacionar"
+            variant="outlined"
+            error={Boolean(errors.title)}
+            helperText={errors.title?.message}
+            InputLabelProps={{ shrink: true }}
             {...register('title')}
-            placeholder="e.g. Dashboard crashes when rotating"
           />
-          {errors.title && <p className="text-xs text-rose-400">{errors.title.message}</p>}
-        </div>
 
-        <div className="space-y-1">
-          <label className="text-xs uppercase tracking-[0.4em] text-slate-500">description</label>
-          <textarea
-            className="w-full rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-primary focus:outline-none"
-            rows={4}
+          <TextField
+            fullWidth
+            label="Descrição"
+            placeholder="Descreva os passos e o esperado"
+            variant="outlined"
+            multiline
+            minRows={4}
+            error={Boolean(errors.description)}
+            helperText={errors.description?.message}
             {...register('description')}
-            placeholder="Describe the steps and expectations"
           />
-          {errors.description && <p className="text-xs text-rose-400">{errors.description.message}</p>}
-        </div>
 
-        <div className="space-y-1">
-          <label className="text-xs uppercase tracking-[0.4em] text-slate-500">date</label>
-          <input
+          <TextField
+            fullWidth
+            label="Data"
             type="date"
-            className="w-full rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-white focus:border-primary focus:outline-none"
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
             {...register('date')}
           />
-        </div>
 
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">device info</p>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            {(['os', 'browser', 'version', 'locale'] as const).map((field) => (
-              <div key={field} className="space-y-1">
-                <label className="text-[0.6rem] uppercase tracking-[0.4em] text-slate-500">{field}</label>
-                <input
-                  className="w-full rounded-2xl border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-white focus:border-primary focus:outline-none"
-                  {...register(`deviceInfo.${field}` as const)}
-                />
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="rounded-full border border-slate-700 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-slate-400"
-            onClick={() => refresh()}
+          <Stack spacing={1}>
+          <Typography variant="overline" sx={{ letterSpacing: '0.35em', color: 'text.secondary' }}>
+            informações do dispositivo
+          </Typography>
+            <Grid container spacing={2}>
+              {deviceFields.map((field) => (
+                <Grid item xs={6} key={field}>
+                  <TextField
+                    fullWidth
+                    label={
+                      field === 'os'
+                        ? 'Sistema'
+                        : field === 'browser'
+                          ? 'Navegador'
+                          : field === 'version'
+                            ? 'Versão'
+                            : 'Localidade'
+                    }
+                    size="small"
+                    variant="outlined"
+                    InputLabelProps={{ shrink: true }}
+                    {...register(`deviceInfo.${field}` as const)}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => refresh()}
+              sx={{ alignSelf: 'flex-start', textTransform: 'uppercase', letterSpacing: '0.3em' }}
+            >
+              autopreencher do dispositivo
+            </Button>
+          </Stack>
+
+          <Stack spacing={1}>
+          <Typography variant="overline" sx={{ letterSpacing: '0.35em', color: 'text.secondary' }}>
+            mídia
+          </Typography>
+          <Button
+            component="label"
+            variant="outlined"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.3em' }}
           >
-            autofill from device
-          </button>
-        </div>
-
-        <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">media</p>
-          <label className="flex items-center justify-between rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-            <span>upload screenshots</span>
+            carregar capturas
             <input
               type="file"
               multiple
-              className="hidden"
-              onChange={(event) => {
-                const names = Array.from(event.target.files ?? []).map((file) => file.name)
-                setUploadList(names)
-              }}
-            />
-          </label>
-          {uploadList.length > 0 && (
-            <p className="text-xs text-slate-400">{uploadList.join(', ')}</p>
-          )}
-        </div>
+              hidden
+                onChange={(event) => {
+                  const names = Array.from(event.target.files ?? []).map((file) => file.name)
+                  setUploadList(names)
+                }}
+              />
+            </Button>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              {uploadList.map((filename) => (
+                <Chip key={filename} label={filename} variant="outlined" />
+              ))}
+            </Stack>
+          </Stack>
 
-        <button
-          type="submit"
-          className="w-full rounded-2xl bg-gradient-to-r from-primary to-sky-500 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white"
-        >
-          submit report
-        </button>
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.3em', py: 1.5 }}
+          >
+            enviar relatório
+          </Button>
+        </Stack>
       </form>
-    </section>
+    </Stack>
   )
 }

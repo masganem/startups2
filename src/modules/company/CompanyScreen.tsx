@@ -1,6 +1,17 @@
 import { useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { fetchBugReports, fetchCompanyById, endorseBugReport } from '../../services/mockApi'
 import { useInfiniteBugReports } from '../../hooks/useBugReports'
 import { useUIStore } from '../../store/uiStore'
@@ -40,77 +51,130 @@ export function CompanyScreen() {
   )
 
   if (companyQuery.isLoading) {
-    return <p className="text-sm text-slate-400">loading company…</p>
+    return (
+      <Typography variant="body2" color="text.secondary">
+        carregando empresa…
+      </Typography>
+    )
   }
 
   const company = companyQuery.data
 
   if (!company) {
-    return <p className="text-sm text-slate-400">company not found</p>
+    return (
+      <Typography variant="body2" color="text.secondary">
+        empresa não encontrada
+      </Typography>
+    )
   }
 
   const reports = bugReportsQuery.data?.pages.flatMap((page) => page.data) ?? []
 
   return (
-    <section className="space-y-6">
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg shadow-slate-950/40">
-        <header className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-slate-400">company</p>
-            <h2 className="text-2xl font-semibold text-white">{company.name}</h2>
-          </div>
-          <div className="h-12 w-12 rounded-full bg-slate-800 text-center text-lg font-semibold text-white">
-            {company.logo}
-          </div>
-        </header>
-        <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-          <div className="rounded-2xl bg-slate-950/80 p-3">
-            <p className="text-xs text-slate-500">Total bounties</p>
-            <p className="text-lg font-semibold text-white">{formatCurrency(company.totalBounties)}</p>
-          </div>
-          <div className="rounded-2xl bg-slate-950/80 p-3">
-            <p className="text-xs text-slate-500">Last month</p>
-            <p className="text-lg font-semibold text-white">{formatCurrency(company.lastMonthBounties)}</p>
-          </div>
-          <div className="rounded-2xl bg-slate-950/80 p-3">
-            <p className="text-xs text-slate-500">Reports total</p>
-            <p className="text-lg font-semibold text-white">{company.totalReports}</p>
-          </div>
-          <div className="rounded-2xl bg-slate-950/80 p-3">
-            <p className="text-xs text-slate-500">Last month</p>
-            <p className="text-lg font-semibold text-white">{company.lastMonthReports}</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          className="mt-5 w-full rounded-2xl bg-gradient-to-r from-primary to-sky-500 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white"
-          onClick={handleReport}
-        >
-          report a bug
-        </button>
-      </div>
+    <Stack spacing={4}>
+      <Card
+        elevation={16}
+        sx={{
+          borderRadius: 4,
+          backgroundColor: 'rgba(15, 23, 42, 0.9)',
+          border: '1px solid rgba(148, 163, 184, 0.2)',
+        }}
+      >
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="overline" sx={{ letterSpacing: '0.4em', color: 'text.secondary' }}>
+                empresa
+              </Typography>
+              <Typography variant="h5" fontWeight={600}>
+                {company.name}
+              </Typography>
+            </Box>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                bgcolor: '#fff',
+                color: '#000',
+                fontSize: '1.25rem',
+              }}
+            >
+              {company.logo}
+            </Avatar>
+          </Stack>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">open reports</p>
-          <button
-            type="button"
-            className="text-xs font-semibold text-slate-400 underline underline-offset-4"
+          <Divider sx={{ my: 3, borderColor: 'rgba(148, 163, 184, 0.2)' }} />
+
+          <Grid container spacing={2}>
+            {[
+              { label: 'Bounty total', value: formatCurrency(company.totalBounties) },
+              { label: 'Último mês', value: formatCurrency(company.lastMonthBounties) },
+              { label: 'Total de relatórios', value: company.totalReports },
+              { label: 'Relatórios no último mês', value: company.lastMonthReports },
+            ].map((metric) => (
+              <Grid item xs={6} key={metric.label}>
+                <PaperMetric label={metric.label} value={metric.value.toString()} />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ mt: 3, letterSpacing: '0.3em', textTransform: 'uppercase' }}
+            onClick={handleReport}
+          >
+            reportar bug
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Stack spacing={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="overline" sx={{ letterSpacing: '0.3em', color: 'text.secondary' }}>
+            relatórios abertos
+          </Typography>
+          <Button
+            variant="text"
+            size="small"
             onClick={() => bugReportsQuery.fetchNextPage()}
             disabled={!bugReportsQuery.hasNextPage || bugReportsQuery.isFetchingNextPage}
+            sx={{ letterSpacing: '0.3em' }}
           >
-            load more
-          </button>
-        </div>
-        <div className="space-y-3">
+            carregar mais
+          </Button>
+        </Stack>
+        <Stack spacing={3}>
           {reports.map((report) => (
             <BugReportCard key={report.id} report={report} onEndorse={handleEndorse} />
           ))}
           {!reports.length && (
-            <p className="text-sm text-slate-500">No reports yet; you can create the first one.</p>
+            <Typography variant="body2" color="text.secondary">
+              Ainda não há relatórios; seja o primeiro.
+            </Typography>
           )}
-        </div>
-      </div>
-    </section>
+        </Stack>
+      </Stack>
+    </Stack>
+  )
+}
+
+function PaperMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <Stack
+      spacing={0.5}
+      sx={{
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        borderRadius: 2,
+        p: 2,
+        border: '1px solid rgba(148, 163, 184, 0.15)',
+        minHeight: 96,
+      }}
+    >
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="h6">{value}</Typography>
+    </Stack>
   )
 }

@@ -1,3 +1,12 @@
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Stack,
+  Typography,
+} from '@mui/material'
 import type { BugReport } from '../../types/data'
 
 interface Props {
@@ -7,27 +16,45 @@ interface Props {
 
 export function BugReportCard({ report, onEndorse }: Props) {
   return (
-    <article className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-xl shadow-slate-900/40">
-      <header className="flex items-center justify-between">
-        <div>
-          <p className="text-base font-semibold text-white">{report.title}</p>
-          <p className="text-xs text-slate-500">{new Date(report.createdAt).toLocaleDateString()}</p>
-        </div>
-        <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-          {report.deviceInfo.os}
-        </span>
-      </header>
-      <p className="mt-3 text-sm text-slate-300">{report.description}</p>
-      <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-slate-400">{report.endorsements} endorsements</span>
-        <button
-          type="button"
-          className="rounded-full bg-slate-800/80 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-slate-100 transition hover:bg-slate-700"
+    <Card
+      elevation={8}
+      sx={{
+        borderRadius: 3,
+        backgroundColor: 'rgba(15, 23, 42, 0.75)',
+        border: '1px solid rgba(148, 163, 184, 0.2)',
+      }}
+    >
+      <CardContent>
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack>
+            <Typography variant="h6">{report.title}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {new Date(report.createdAt).toLocaleDateString()}
+            </Typography>
+          </Stack>
+          <Chip
+            label={report.deviceInfo.os}
+            size="small"
+            sx={{ letterSpacing: '0.4em', textTransform: 'uppercase' }}
+          />
+        </Stack>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          {report.description}
+        </Typography>
+      </CardContent>
+      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+        <Typography variant="caption" color="text.secondary">
+          {report.endorsements} endorsements
+        </Typography>
+        <Button
+          size="small"
+          variant="outlined"
           onClick={() => onEndorse(report.id)}
+          sx={{ textTransform: 'uppercase', letterSpacing: '0.3em' }}
         >
-          endorse
-        </button>
-      </div>
-    </article>
+          apoiar
+        </Button>
+      </CardActions>
+    </Card>
   )
 }

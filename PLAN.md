@@ -140,4 +140,3 @@ src/
 ### 10. Delivery checklist
 1. `README` summarizing setup, scripts, component libs.
 2. Ensure `npm run dev`, `npm run build`, `npm run test` succeed.
-3. (Optional) deploy preview instructions via Vercel/Netlify.

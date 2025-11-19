@@ -1,3 +1,4 @@
+import { IconButton, InputAdornment, Stack, TextField, Typography, Button, CircularProgress } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CompanyCard } from '../../components/Cards/CompanyCard'
@@ -26,30 +27,55 @@ export function SearchScreen() {
   }
 
   return (
-    <section className="space-y-5">
-      <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.4em] text-slate-500">search</p>
-        <div className="flex gap-2">
-          <input
+    <Stack spacing={4}>
+      <Stack spacing={1}>
+        <Typography variant="overline" sx={{ letterSpacing: '0.4em', color: 'text.secondary' }}>
+          busca
+        </Typography>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+          <TextField
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Search company or service"
-            className="flex-1 rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-primary focus:outline-none"
+            placeholder="Pesquisar empresa ou serviço"
+            variant="outlined"
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {searchTerm && (
+                    <IconButton
+                      aria-label="Limpar busca"
+                      onClick={() => setSearchTerm('')}
+                      size="small"
+                      sx={{ color: 'text.secondary' }}
+                    >
+                      ✕
+                    </IconButton>
+                  )}
+                </InputAdornment>
+              ),
+            }}
           />
-          <button
-            type="button"
-            className="rounded-2xl border border-slate-700 px-4 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-400"
+          <Button
+            variant="outlined"
+            sx={{ textTransform: 'uppercase', letterSpacing: '0.3em' }}
             onClick={() => setSearchTerm('')}
           >
-            clear
-          </button>
-        </div>
-      </div>
+            limpar
+          </Button>
+        </Stack>
+      </Stack>
 
-      <div className="flex flex-col gap-4">
-        {companiesQuery.isLoading && <p className="text-sm text-slate-400">warming up companies…</p>}
+      <Stack spacing={3}>
+        {companiesQuery.isLoading && (
+          <Typography variant="body2" color="text.secondary">
+            carregando empresas…
+          </Typography>
+        )}
         {companies.length === 0 && !companiesQuery.isLoading && (
-          <p className="text-sm text-slate-500">no companies match that query yet.</p>
+          <Typography variant="body2" color="text.secondary">
+            nenhuma empresa corresponde à busca.
+          </Typography>
         )}
         {companies.map((company) => (
           <CompanyCard
@@ -59,18 +85,23 @@ export function SearchScreen() {
             onReport={handleReport}
           />
         ))}
-      </div>
+      </Stack>
 
       {companiesQuery.hasNextPage && (
-        <button
-          type="button"
-          className="w-full rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{ textTransform: 'uppercase', letterSpacing: '0.3em' }}
           onClick={() => companiesQuery.fetchNextPage()}
           disabled={companiesQuery.isFetchingNextPage}
         >
-          {companiesQuery.isFetchingNextPage ? 'loading more…' : 'load more'}
-        </button>
+          {companiesQuery.isFetchingNextPage ? (
+            <CircularProgress size={18} color="inherit" />
+          ) : (
+            'carregar mais'
+          )}
+        </Button>
       )}
-    </section>
+    </Stack>
   )
 }
