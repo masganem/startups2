@@ -1,6 +1,18 @@
 import type { Company, Service, User } from '../types/data'
 
-const serviceNames = ['Payments', 'Auth', 'Dashboard', 'Insights', 'Notifications', 'Billing']
+const serviceNames = [
+  'Payments',
+  'Auth',
+  'Dashboard',
+  'Insights',
+  'Notifications',
+  'Billing',
+  'Onboarding',
+  'Analytics',
+  'Search',
+  'Storage',
+  'Gateway',
+]
 const companyNames = ['NovaSPIRE', 'AtlasWave', 'LumenCore', 'EchoNexus', 'PulsePoint', 'AstraForge']
 const locales = ['en-US', 'pt-BR', 'es-ES', 'fr-FR']
 
@@ -15,10 +27,12 @@ function randomFrom<T>(array: T[]) {
 }
 
 function generateServices(companyId: number): Service[] {
-  const serviceCount = 2 + (companyId % 3)
-  return Array.from({ length: serviceCount }, (_, index) => ({
+  const serviceCount = Math.min(serviceNames.length, 3 + (companyId % 4))
+  const rotatedNames = [...serviceNames.slice(companyId), ...serviceNames.slice(0, companyId)]
+
+  return rotatedNames.slice(0, serviceCount).map((name, index) => ({
     id: `service-${companyId}-${index}`,
-    name: serviceNames[(companyId + index) % serviceNames.length],
+    name,
   }))
 }
 

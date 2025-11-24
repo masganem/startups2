@@ -16,16 +16,18 @@ export function ReportBugScreen() {
   const { device, refresh } = useDeviceInfo()
   const setDeviceInfo = useUIStore((state) => state.setDeviceInfo)
 
-  const state = location.state as { companyId?: string; serviceId?: string } | null
+  const state = location.state as { companyId?: string; serviceId?: string; linkedReportTitle?: string; linkedReportNumber?: number } | null
   const companyId = state?.companyId ?? companies[0]?.id
   const serviceId = state?.serviceId ?? useUIStore.getState().selectedService?.id
+  const linkedReportTitle = state?.linkedReportTitle
+  const linkedReportNumber = state?.linkedReportNumber
   const service =
     companies
       .flatMap((company) => company.services)
       .find((candidate) => candidate.id === serviceId) ?? companies[0]?.services[0]
 
   const defaultDate = new Date().toISOString().slice(0, 10)
-  const form = useBugReportForm(device, defaultDate)
+  const form = useBugReportForm(device, defaultDate, linkedReportTitle)
   const {
     handleSubmit,
     register,
@@ -87,6 +89,21 @@ export function ReportBugScreen() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={3}>
+          {linkedReportNumber && (
+            <Typography variant="overline" sx={{ letterSpacing: '0.35em', color: 'text.secondary' }}>
+              CONTRIBUINDO COM O REPORT{' '}
+              <span
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                  border: '1px solid rgba(148, 163, 184, 0.3)',
+                }}
+              >
+                #{linkedReportNumber}
+              </span>
+            </Typography>
+          )}
           <TextField
             fullWidth
             label="Título"

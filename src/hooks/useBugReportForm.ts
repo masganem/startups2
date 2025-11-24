@@ -18,15 +18,15 @@ const bugReportSchema = z.object({
 
 export type BugReportFormValues = z.infer<typeof bugReportSchema>
 
-export function useBugReportForm(defaultDevice: DeviceInfo, defaultDate: string) {
+export function useBugReportForm(defaultDevice: DeviceInfo, defaultDate: string, defaultTitle?: string) {
   const initialValues = useMemo(
     () => ({
-      title: '',
+      title: defaultTitle ?? '',
       description: '',
       date: defaultDate,
       deviceInfo: defaultDevice,
     }),
-    [defaultDate, defaultDevice],
+    [defaultDate, defaultDevice, defaultTitle],
   )
 
   const form = useForm<BugReportFormValues>({

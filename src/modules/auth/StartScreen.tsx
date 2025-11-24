@@ -46,9 +46,9 @@ export function StartScreen() {
         <Typography
           variant="caption"
           align="center"
-          sx={{ letterSpacing: '0.35em', color: 'text.secondary' }}
+          sx={{ letterSpacing: '0.2em', color: 'text.secondary' }}
         >
-          apenas o papel de usuário está ativo
+          Procurando informações para empresas?
         </Typography>
       </Stack>
     </Paper>

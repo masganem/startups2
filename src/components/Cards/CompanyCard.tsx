@@ -19,8 +19,6 @@ interface Props {
 }
 
 export function CompanyCard({ company, onSelectCompany, onReport }: Props) {
-  const primaryService = company.services[0]
-
   return (
     <Card
       elevation={10}
@@ -32,13 +30,11 @@ export function CompanyCard({ company, onSelectCompany, onReport }: Props) {
     >
       <CardHeader
         onClick={() => onSelectCompany(company.id)}
-        sx={{ cursor: 'pointer', pb: 0 }}
+        sx={{ cursor: 'pointer', pb: 2 }}
         avatar={
           <Avatar sx={{ bgcolor: '#fff', color: '#000' }}>{company.logo}</Avatar>
         }
         title={company.name}
-        subheader={primaryService?.name}
-        subheaderTypographyProps={{ letterSpacing: '0.2em', textTransform: 'uppercase' }}
         titleTypographyProps={{ fontWeight: 600 }}
       />
       <Divider />
@@ -63,14 +59,6 @@ export function CompanyCard({ company, onSelectCompany, onReport }: Props) {
           size="small"
           sx={{ letterSpacing: '0.3em', borderRadius: 16 }}
         />
-        <Button
-          size="small"
-          variant="contained"
-          onClick={() => onReport(company.id, primaryService)}
-          sx={{ textTransform: 'uppercase', letterSpacing: '0.3em' }}
-        >
-          reportar bug
-        </Button>
       </CardActions>
     </Card>
   )

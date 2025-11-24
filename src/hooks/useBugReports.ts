@@ -1,11 +1,10 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { fetchBugReports } from '../services/mockApi'
 
-export function useInfiniteBugReports(serviceId: string) {
+export function useInfiniteBugReports() {
   return useInfiniteQuery({
-    enabled: Boolean(serviceId),
-    queryKey: ['bugReports', serviceId],
-    queryFn: ({ pageParam = 0 }) => fetchBugReports({ serviceId, cursor: pageParam }),
+    queryKey: ['bugReports'],
+    queryFn: ({ pageParam = 0 }) => fetchBugReports({ cursor: pageParam }),
     getNextPageParam: (last) => last.nextCursor,
   })
 }

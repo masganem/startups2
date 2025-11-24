@@ -7,14 +7,30 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 import type { BugReport } from '../../types/data'
 
 interface Props {
   report: BugReport
   onEndorse: (reportId: string) => void
+  companyId?: string
 }
 
-export function BugReportCard({ report, onEndorse }: Props) {
+export function BugReportCard({ report, onEndorse, companyId }: Props) {
+  const navigate = useNavigate()
+
+  const handleContribute = () => {
+    const reportNumber = Math.floor(Math.random() * 100) + 1
+    navigate('/report', {
+      state: {
+        companyId,
+        serviceId: report.serviceId,
+        linkedReportTitle: report.title,
+        linkedReportNumber: reportNumber,
+      },
+    })
+  }
+
   return (
     <Card
       elevation={8}
@@ -29,7 +45,7 @@ export function BugReportCard({ report, onEndorse }: Props) {
           <Stack>
             <Typography variant="h6">{report.title}</Typography>
             <Typography variant="caption" color="text.secondary">
-              {new Date(report.createdAt).toLocaleDateString()}
+              {new Date(report.createdAt).toLocaleDateString('en-GB')}
             </Typography>
           </Stack>
           <Chip
@@ -44,15 +60,15 @@ export function BugReportCard({ report, onEndorse }: Props) {
       </CardContent>
       <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
         <Typography variant="caption" color="text.secondary">
-          {report.endorsements} endorsements
+          {report.endorsements} reproduções
         </Typography>
         <Button
           size="small"
           variant="outlined"
-          onClick={() => onEndorse(report.id)}
+          onClick={handleContribute}
           sx={{ textTransform: 'uppercase', letterSpacing: '0.3em' }}
         >
-          apoiar
+          contribuir
         </Button>
       </CardActions>
     </Card>

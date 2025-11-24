@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -30,8 +30,24 @@ export function CompanyScreen() {
     enabled: Boolean(companyId),
   })
 
-  const serviceId = companyQuery.data?.services[0]?.id ?? ''
-  const bugReportsQuery = useInfiniteBugReports(serviceId)
+  const bugReportsQuery = useInfiniteBugReports()
+  const loadMoreRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!loadMoreRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && bugReportsQuery.hasNextPage && !bugReportsQuery.isFetchingNextPage) {
+          bugReportsQuery.fetchNextPage()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(loadMoreRef.current)
+    return () => observer.disconnect()
+  }, [bugReportsQuery])
 
   const handleReport = useCallback(() => {
     const service = companyQuery.data?.services[0]
@@ -45,9 +61,9 @@ export function CompanyScreen() {
   const handleEndorse = useCallback(
     async (reportId: string) => {
       await endorseBugReport(reportId)
-      queryClient.invalidateQueries(['bugReports', serviceId])
+      queryClient.invalidateQueries(['bugReports'])
     },
-    [queryClient, serviceId],
+    [queryClient],
   )
 
   if (companyQuery.isLoading) {
@@ -130,29 +146,19 @@ export function CompanyScreen() {
       </Card>
 
       <Stack spacing={2}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="overline" sx={{ letterSpacing: '0.3em', color: 'text.secondary' }}>
-            relatórios abertos
-          </Typography>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => bugReportsQuery.fetchNextPage()}
-            disabled={!bugReportsQuery.hasNextPage || bugReportsQuery.isFetchingNextPage}
-            sx={{ letterSpacing: '0.3em' }}
-          >
-            carregar mais
-          </Button>
-        </Stack>
+        <Typography variant="overline" sx={{ letterSpacing: '0.3em', color: 'text.secondary' }}>
+          relatórios abertos
+        </Typography>
         <Stack spacing={3}>
           {reports.map((report) => (
-            <BugReportCard key={report.id} report={report} onEndorse={handleEndorse} />
+            <BugReportCard key={report.id} report={report} onEndorse={handleEndorse} companyId={companyId} />
           ))}
           {!reports.length && (
             <Typography variant="body2" color="text.secondary">
               Ainda não há relatórios; seja o primeiro.
             </Typography>
           )}
+          <div ref={loadMoreRef} style={{ height: '20px' }} />
         </Stack>
       </Stack>
     </Stack>
